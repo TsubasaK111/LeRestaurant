@@ -3,7 +3,10 @@ import cgi
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from database_setup import Base, Restaurant, MenuItem
+
+import pdb
 
 
 engine = create_engine('sqlite:///restaurantmenu.db')
@@ -28,12 +31,18 @@ page_head = """
 new_restaurant_form = """\n
     <form method = 'POST' enctype = 'multipart/form-data' action = '/new'>
         <h1>Add a new Restaurant!</h1>
-        <input name = 'restaurant name' type = 'text' >
+        <input name = 'new restaurant name' type = 'text' >
         <input type = 'submit' value = 'Submit'>
     </form>
 """
 
-
+edit_restaurant_form = """\n
+    <form method = 'POST' enctype = 'multipart/form-data' action = '%s/edit'>
+        <h1>Rename your Restaurant</h1>
+        <input name = 'edited restaurant name' type = 'text' >
+        <input type = 'submit' value = 'Submit'>
+    </form>
+"""
 #request handler code
 class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -52,46 +61,41 @@ class webserverHandler(BaseHTTPRequestHandler):
                 return
 
             if self.path.endswith("/restaurant"):
+                print 'serving restaurant! '
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html' )
                 self.end_headers()
-
                 output = page_head
                 output += "<h1>The Franchise Manager</h1>\n"
                 restaurants = session.query(Restaurant).all()
                 for restaurant in restaurants:
-                    print restaurant.name
+                    # print restaurant.name
                     output += """<h2> %s </h2>
-                                 <a href="">edit</a> "
+                                 <a href="%s/edit">edit</a> "
                                  <a href="">delete</a>
-                              """ % restaurant.name
+                              """ % (restaurant.name, restaurant.id,)
                 output += new_restaurant_form
                 output += "</body></html>"
-
                 self.wfile.write(output)
-                print "output is: ", output
                 return
 
-            # if self.path.endswith("/restaurant/new"):
-            #     self.send_response(200)
-            #     self.send_header('Content-type', 'text/html')
-            #     self.end_header()
-            #
-            #     output = "<html><body>"
-            #     output += "<form method = 'POST' "
-            #     output += "enctype = 'multipart/form-data' "
-            #     output += "action = '/new'>"
-            #     output += "<h1>Add A New Restaurant!</h1>"
-            #     output += "<input name = 'message' type = 'text' >"
-            #     output += "<input type = 'submit' value = 'Submit'>"
-            #     output += "</form>"
+            restaurants = session.query(Restaurant).all()
+            for restaurant in restaurants:
+                print "interating throught restaurants..."
+                print restaurant.id, restaurant.name
+                if self.path.endswith("/restaurant/%s/edit" % restaurant.id):
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html' )
+                    self.end_headers()
+                    output = page_head
+                    self.wfile.write(output)
+                    return
 
         except:
 
-            self.send_error(
-                404,
-                "NOOOES! File not found! :( %s" %  self.path
-                )
+            self.send_error(404,
+                            " NOOOES! File not found! :(  %s" %  self.path
+                            )
 
     def do_POST(self):
 
@@ -105,19 +109,36 @@ class webserverHandler(BaseHTTPRequestHandler):
 
             if content_type == 'multipart/form-data':
                 fields = cgi.parse_multipart(self.rfile, parameter_dictionary)
-                new_restaurant_name = fields.get('restaurant name')
-                new_restaurant = Restaurant(name = new_restaurant_name[0])
-                session.add(new_restaurant)
-                session.commit()
+                print "fields are: ", fields
                 output = page_head
-                output += "<h1> Restaurant Added! : </h1>"
-                output += "<h3> %s </h3>\n" % new_restaurant_name[0]
-                output += new_restaurant_form
-                output += "<a href='/restaurant'>return to listing</a>"
-                output += "</body></html>"
+                if 'new restaurant name' in fields:
+                    print 'new restaurant name!'
+                    new_restaurant_name = fields.get('new restaurant name')
+                    new_restaurant = Restaurant(name = new_restaurant_name[0])
+                    session.add(new_restaurant)
+                    session.commit()
+                    output += "<h1> Restaurant Added! : </h1>"
+                    output += "<h3> %s </h3>\n" % new_restaurant_name[0]
+                    output += new_restaurant_form
+                    output += "<a href='/restaurant'>return to listing</a>"
+                    output += "</body></html>"
+                if 'edited restaurant name' in fields:
+                    print "edited restaurant name!"
+                    edited_name = fields.get('edited restaurant name')
+                    # session.execute(
+                    #     text("UPDATE restaurant SET name = :edited_name WHERE id = :edited_restaurant_id"),
+                    #     {"edited_name": edited_name, "edited_restaurant_id": edited_restaurant_id}
+                    # )
+                    # session.commit()
+                    # output += "<h1> Restaurant Edited! : </h1>"
+                    # output += "<h3> %s </h3>\n" % edited_name[0]
+                    # output += edited_restaurant_form %
+                    pdb.set_trace()
+                    output += "<a href='/restaurant'>return to listing</a>"
+                    output += "</body></html>"
 
             self.wfile.write(output)
-            print output
+            # print output
 
         except:
             pass
@@ -131,7 +152,7 @@ def main():
         server.serve_forever()
 
     except KeyboardInterrupt:
-        print "Righty ho, captain! Stopping web server..."
+        print " Righty ho, captain! Stopping web server... "
         server.socket.close()
 
 # Run only when run as script, NOT when imported.
