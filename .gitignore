@@ -50,8 +50,11 @@ coverage.xml
 # Django stuff:
 *.log
 
-#databases:
+# databases:
 *.db
+
+# wtf is this anyways?
+.DS_STORE
 
 # Sphinx documentation
 docs/_build/
