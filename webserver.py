@@ -11,8 +11,30 @@ Base.metadata.bind = engine
 DatabaseSession = sessionmaker(bind = engine)
 session = DatabaseSession()
 
+#common html code
+page_head = """
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>The Franchise Manager</title>
 
-#handler code
+    <!-- Bootstrap 3 -->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
+</head>
+<body>
+"""
+
+new_restaurant_form = """\n
+    <form method = 'POST' enctype = 'multipart/form-data' action = '/new'>
+        <h1>Add a new Restaurant!</h1>
+        <input name = 'restaurant name' type = 'text' >
+        <input type = 'submit' value = 'Submit'>
+    </form>
+"""
+
+
+#request handler code
 class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
 
@@ -23,7 +45,8 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html' )
                 self.end_headers()
 
-                output = "<html><body> SUP BROOOO </body><html>"
+                output = page_head
+                output += "SUP BROOOO </body><html>"
                 self.wfile.write(output)
                 print "output is: ", output
                 return
@@ -33,20 +56,35 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html' )
                 self.end_headers()
 
-                output = "<html><body>"
-                output += "<h1>The Franchise Manager</h1>"
+                output = page_head
+                output += "<h1>The Franchise Manager</h1>\n"
                 restaurants = session.query(Restaurant).all()
                 for restaurant in restaurants:
                     print restaurant.name
-                    output += "<h2> %s </h2>" % restaurant.name
-                    output += "<a href="">edit</a> "
-                    output += "<a href="">delete</a>"
-                # output += "<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What wouldja like me to say?</h2><input name='message' type='text' ><input type='submit' value='Submit'></form>"
+                    output += """<h2> %s </h2>
+                                 <a href="">edit</a> "
+                                 <a href="">delete</a>
+                              """ % restaurant.name
+                output += new_restaurant_form
                 output += "</body></html>"
 
                 self.wfile.write(output)
                 print "output is: ", output
                 return
+
+            # if self.path.endswith("/restaurant/new"):
+            #     self.send_response(200)
+            #     self.send_header('Content-type', 'text/html')
+            #     self.end_header()
+            #
+            #     output = "<html><body>"
+            #     output += "<form method = 'POST' "
+            #     output += "enctype = 'multipart/form-data' "
+            #     output += "action = '/new'>"
+            #     output += "<h1>Add A New Restaurant!</h1>"
+            #     output += "<input name = 'message' type = 'text' >"
+            #     output += "<input type = 'submit' value = 'Submit'>"
+            #     output += "</form>"
 
         except:
 
@@ -56,26 +94,34 @@ class webserverHandler(BaseHTTPRequestHandler):
                 )
 
     def do_POST(self):
+
         try:
             self.send_response(301)
             self.end_headers()
 
-            ctype, pdict = cgi.parse_header( self.headers.getheader('content-type') )
-            if ctype == 'multipart/form-data':
-                fields=cgi.parse_multipart(self.rfile, pdict)
-                messagecontent = fields.get('message')
-            output = ""
-            output += "<html><body>"
-            output += "<h2> Okay, how about this: </h2>"
-            output += "<h1> %s </h1>" % messagecontent[0]
-            output += "<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What wouldja like me to say?</h2><input name='message' type='text' ><input type='submit' value='Submit'></form>"
-            output += "</body></html>"
+            content_type, parameter_dictionary = cgi.parse_header( self.headers.getheader('content-type') )
+            print "content_type is: ", content_type
+            print "parameter_dictionary is: ", parameter_dictionary
+
+            if content_type == 'multipart/form-data':
+                fields = cgi.parse_multipart(self.rfile, parameter_dictionary)
+                new_restaurant_name = fields.get('restaurant name')
+                new_restaurant = Restaurant(name = new_restaurant_name[0])
+                session.add(new_restaurant)
+                session.commit()
+                output = page_head
+                output += "<h1> Restaurant Added! : </h1>"
+                output += "<h3> %s </h3>\n" % new_restaurant_name[0]
+                output += new_restaurant_form
+                output += "<a href='/restaurant'>return to listing</a>"
+                output += "</body></html>"
+
             self.wfile.write(output)
             print output
-            # output += "<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What wouldja like me to say?</h2><input name='message' type='text' ><input type='submit' value='Submit'></form>"
 
         except:
             pass
+
 #main() code
 def main():
     try:
