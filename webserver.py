@@ -46,6 +46,14 @@ edit_restaurant_form = """\n
     </form>
 """
 
+delete_restaurant_form = """\n
+    <form method = 'POST' enctype = 'multipart/form-data' action = '%s/deleted'>
+        <h1>Delete your Restaurant</h1>
+        <p> Are you sure you want to delete this restaurant?</p>
+        <input type = 'submit' value = 'Submit'>
+    </form>
+"""
+
 #request handler code
 class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -57,6 +65,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html' )
                 self.end_headers()
+
                 output = page_head
                 output += "<h1>The Franchise Manager</h1>\n"
                 restaurants = session.query(Restaurant).all()
@@ -71,25 +80,37 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.wfile.write(output)
                 return
 
-            restaurants = session.query(Restaurant).all()
-            print "restaurants query is: "
-            pprint.pprint(restaurants)
-            for restaurant in restaurants:
-                print "self.path is...: ", self.path
-                print "that string concat thing: ", "/restaurant/%s/edit" % restaurant.id
-                if self.path.endswith("/restaurant/%s/edit" % restaurant.id):
-                    self.send_response(200)
-                    self.send_header('Content-type', 'text/html')
-                    self.end_headers()
-                    output = page_head
-                    print "iterating throught restaurants..."
-                    print restaurant.id, restaurant.name
-                    output += edit_restaurant_form % restaurant.id
-                    output += "</body></html>"
-                    print "'output' for restaurant/id/edit is: ", output
-                    self.wfile.write(output)
-                    # pdb.set_trace()
-                    return
+            if self.path.endswith("/edit"):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                output = page_head
+                print "restaurant/edit... accessed..."
+                restaurant_id = self.path.split('/')[1]
+                print "restaurant_id sez: ", restaurant_id
+                output += edit_restaurant_form % restaurant_id
+                output += "</body></html>"
+                print "'output' for restaurant/id/edit is: ", output
+                self.wfile.write(output)
+                # pdb.set_trace()
+                return
+
+            if self.path.endswith("/delete"):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                output = page_head
+                print "restaurant/delete accessed..."
+                restaurant_id = self.path.split('/')[1]
+                print "restaurant_id sez: ", restaurant_id
+                output += delete_restaurant_form % restaurant_id
+                output += "</body></html>"
+                print "'output' for restaurant/id/delete is: ", output
+                self.wfile.write(output)
+                # pdb.set_trace()
+                return
 
         except:
 
@@ -145,6 +166,23 @@ class webserverHandler(BaseHTTPRequestHandler):
                     # pdb.set_trace()
                     output += "<h1> Restaurant Edited! : </h1>"
                     output += "<h3> %s </h3>\n" % edited_name
+                    output += "<a href='/restaurant'>return to listing</a>"
+                    output += "</body></html>"
+
+                if 'deleted' in self.path:
+                    print "deleted restaurant name!"
+                    restaurant_id = self.path.split('/')[2]
+                    print "restaurant_id is: ", restaurant_id
+                    result = session.execute("""
+                            DELETE FROM restaurant
+                            WHERE id=:deleted_restaurant_id;
+                        """,
+                        {"deleted_restaurant_id": restaurant_id}
+                    )
+                    print "result is: ", result
+                    session.commit()
+                    # pdb.set_trace()
+                    output += "<h1> Restaurant Deleted! : </h1>"
                     output += "<a href='/restaurant'>return to listing</a>"
                     output += "</body></html>"
 
