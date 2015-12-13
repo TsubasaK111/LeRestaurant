@@ -39,18 +39,18 @@ new_restaurant_form = """\n
 """
 
 edit_restaurant_form = """\n
-    <form method = 'POST' enctype = 'multipart/form-data' action = '%s/edited'>
+    <form method = 'POST' enctype = 'multipart/form-data' action = '/%s/edited'>
         <h1>Rename your Restaurant</h1>
-        <input name = 'edited restaurant name' type = 'text' >
+        <input name = 'edited restaurant name' type = 'text' placeholder = '%s'>
         <input type = 'submit' value = 'Submit'>
     </form>
 """
 
 delete_restaurant_form = """\n
-    <form method = 'POST' enctype = 'multipart/form-data' action = '%s/deleted'>
+    <form method = 'POST' enctype = 'multipart/form-data' action = '/%s/deleted'>
         <h1>Delete your Restaurant</h1>
-        <p> Are you sure you want to delete this restaurant?</p>
-        <input type = 'submit' value = 'Submit'>
+        <p> Are you sure you want to delete '%s'?</p>
+        <input type = 'submit' value = 'Delete'>
     </form>
 """
 
@@ -59,6 +59,8 @@ class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
 
         try:
+            print "GET request!^^"
+            print "self.path is: ", self.path
 
             if self.path.endswith("/restaurant"):
                 print 'serving restaurant! '
@@ -72,8 +74,8 @@ class webserverHandler(BaseHTTPRequestHandler):
                 for restaurant in restaurants:
                     output += """
                         <h2> %s </h2>
-                        <a href="restaurant/%s/edit">edit</a>
-                        <a href="restaurant/%s/delete">delete</a>
+                        <a href="/restaurant/%s/edit">edit</a>
+                        <a href="/restaurant/%s/delete">delete</a>
                     """ % (restaurant.name, restaurant.id, restaurant.id,)
                 output += new_restaurant_form
                 output += "</body></html>"
@@ -87,9 +89,15 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 output = page_head
                 print "restaurant/edit... accessed..."
-                restaurant_id = self.path.split('/')[1]
+                restaurant_id = self.path.split('/')[2]
                 print "restaurant_id sez: ", restaurant_id
-                output += edit_restaurant_form % restaurant_id
+                restaurant = session.query(Restaurant).\
+                    filter_by(id = restaurant_id).first()
+                print "restaurant query sez: ", restaurant
+                restaurant_name = restaurant.name
+                print "restaurant_name is: ", restaurant_name
+                output += edit_restaurant_form %(restaurant_id, restaurant_name)
+                output += "<a href='/restaurant'>return to listing</a>"
                 output += "</body></html>"
                 print "'output' for restaurant/id/edit is: ", output
                 self.wfile.write(output)
@@ -103,9 +111,15 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 output = page_head
                 print "restaurant/delete accessed..."
-                restaurant_id = self.path.split('/')[1]
+                restaurant_id = self.path.split('/')[2]
                 print "restaurant_id sez: ", restaurant_id
-                output += delete_restaurant_form % restaurant_id
+                restaurant = session.query(Restaurant).\
+                    filter_by(id = restaurant_id).first()
+                print "restaurant query sez: ", restaurant
+                restaurant_name = restaurant.name
+                print "restaurant_name is: ", restaurant_name
+                output += delete_restaurant_form % (restaurant_id, restaurant_name)
+                output += "<a href='/restaurant'>return to listing</a>"
                 output += "</body></html>"
                 print "'output' for restaurant/id/delete is: ", output
                 self.wfile.write(output)
@@ -151,7 +165,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 if 'edited restaurant name' in fields:
                     print "edited restaurant name!"
                     edited_name = fields.get('edited restaurant name')[0]
-                    restaurant_id = self.path.split('/')[2]
+                    restaurant_id = self.path.split('/')[1]
                     print "restaurant_id is: ", restaurant_id
                     result = session.execute("""
                             UPDATE restaurant
@@ -171,7 +185,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 
                 if 'deleted' in self.path:
                     print "deleted restaurant name!"
-                    restaurant_id = self.path.split('/')[2]
+                    restaurant_id = self.path.split('/')[1]
                     print "restaurant_id is: ", restaurant_id
                     result = session.execute("""
                             DELETE FROM restaurant
