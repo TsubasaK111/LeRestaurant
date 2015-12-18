@@ -3,29 +3,26 @@
     <meta charset="utf-8">
     <title>The Menu Manager</title>
     <!-- Bootstrap 3 -->
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="bootstrap-theme.min.css">
 </head>
 <body>
 
 <h1>{{restaurant.name}}</h1>
 
 
-{% for item in items %}
+{% for menuItem in menuItems %}
 
 <div>
 
-<p>{{item.name}}</p>
+<p>{{menuItem.name}}</p>
 
-<p>{{item.description}}</p>
+<p>{{menuItem.description}}</p>
 
-<p> {{item.price}} </p>
+<p> {{menuItem.price}} </p>
 
-<a href={{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_id=item.id) }}>edit</a>
-<a href={{ url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=item.id) }}>delete</a>
-
-<a href="/restaurant/{{restaurant.id}}/{{item.id}}/edit">edit</a>
-<a href="/restaurant/{{restaurant.id}}/{{item.id}}/delete">delete</a>
+<a href={{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_id=menuItem.id) }}>edit</a>
+<a href={{ url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=menuItem.id) }}>delete</a>
 
 </div>
 

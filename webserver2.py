@@ -22,11 +22,14 @@ page_head = """
     <meta charset="utf-8">
     <title>The Menu Manager</title>
     <!-- Bootstrap 3 -->
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="bootstrap-theme.min.css">
 </head>
 <body>
 """
+# bootstrap links, for future reference
+# <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+# <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
 
 
 @app.route('/')
@@ -35,11 +38,11 @@ def restaurantMenu(restaurant_id):
 
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
     print restaurant
-    items = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
-    output = render_template('menu.html', restaurant=restaurant, items=items)
+    menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
+    output = render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
     return output
 
-@app.route('/restaurants/<int:restuarant_id>/new/')
+@app.route('/restaurants/<int:restaurant_id>/new/')
 def newMenuItem(restaurant_id):
     """page to create a new menu item."""
     output = page_head
