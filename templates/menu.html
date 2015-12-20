@@ -1,15 +1,9 @@
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>The Menu Manager</title>
-    <!-- Bootstrap 3 -->
-    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="bootstrap-theme.min.css">
-</head>
-<body>
 
 <h1>{{restaurant.name}}</h1>
 
+<div>
+  <p>Create a   <a href={{ url_for('newMenuItem', restaurant_id=restaurant.id) }}>New</a>  Menu Item</p>
+</div>
 
 {% for menuItem in menuItems %}
 

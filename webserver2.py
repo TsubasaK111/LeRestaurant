@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, request, redirect
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -23,10 +23,11 @@ page_head = """
     <title>The Menu Manager</title>
     <!-- Bootstrap 3 -->
     <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap-theme.min.css" />
 </head>
 <body>
 """
+
 # bootstrap links, for future reference
 # <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
 # <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
@@ -37,29 +38,35 @@ page_head = """
 def restaurantMenu(restaurant_id):
 
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
-    print restaurant
+    print "restaurantMenu triggered: ", restaurant
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
-    output = render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
+    output = render_template('page_head.html', title = "The Menu Manager")
+    output += render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
     return output
 
-@app.route('/restaurants/<int:restaurant_id>/new/')
+
+@app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
     """page to create a new menu item."""
-    output = page_head
-    output += """\n
-        <form method = 'POST' enctype = 'multipart/form-data' action = '/new'>
-            <h1>Add a new Restaurant!</h1>
-            <input name = 'new restaurant name' type = 'text' >
-            <input type = 'submit' value = 'Submit'>
-        </form>
-    """
-    # return output
-    return "page to create a new menu item. Task 1 complete!"
+    if request.method == "POST":
+        print "POST triggered, name is: ", request.form['name']
+        newMenuItem = MenuItem( name=request.form['name'],
+                                restaurant_id=restaurant_id )
+        session.add(newMenuItem)
+        session.commit()
+        print "POST worked!"
+        return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
+    else:
+        restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+        output = render_template('page_head.html', title = "The Menu Manager")
+        output += render_template('newMenuItem.html', restaurant = restaurant)
+        return output
+
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/')
 def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
-    output = page_head
+    output = render_template('page_head.html', title = "The Menu Manager")
     print "restaurants/restaurant_id/menu_id/edit accessed..."
 
     print "restaurant_id sez: ", restaurant_id
@@ -88,10 +95,11 @@ def editMenuItem(restaurant_id, menu_id):
     # return output
     return "page to edit a menu item. Task 2 complete!"
 
+
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/')
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
-    output = page_head
+    output = render_template('page_head.html', title = "The Menu Manager")
     print "restaurants/delete accessed..."
 
     print "restaurant_id sez: ", restaurant_id
@@ -117,8 +125,9 @@ def deleteMenuItem(restaurant_id, menu_id):
     """  % (restaurant_id, menu_id, menu_name)
     output += "<a href='/restaurants/'>return to listing</a>"
     output += "</body></html>"
-    # return output
-    return "page to delete a menu item. Task 3 complete!"
+    return output
+    # return "page to delete a menu item. Task 3 complete!"
+
 
 if __name__ == "__main__":
     app.debug = True
