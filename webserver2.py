@@ -33,7 +33,10 @@ page_head = """
 # <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
 
 
-@app.route('/')
+@app.route('/restaurants/')
+def index():
+    return redirect(url_for("restaurantMenu", restaurant_id="2"))
+
 @app.route('/restaurants/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
 
@@ -67,15 +70,8 @@ def newMenuItem(restaurant_id):
 def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
     output = render_template('page_head.html', title = "The Menu Manager")
+
     print "restaurants/restaurant_id/menu_id/edit accessed..."
-
-    print "restaurant_id sez: ", restaurant_id
-    restaurant = session.query(Restaurant).\
-        filter_by(id = restaurant_id).first()
-    print "restaurant query sez: ", restaurant
-    restaurant_name = restaurant.name
-    print "restaurant_name is: ", restaurant_name
-
     print "menu_id sez: ", menu_id
     item = session.query(MenuItem).\
         filter_by(id = menu_id).first()
@@ -83,17 +79,11 @@ def editMenuItem(restaurant_id, menu_id):
     menu_name = item.name
     print "menu_name is: ", menu_name
 
-    output += """\n
-        <form method = 'POST' enctype = 'multipart/form-data' action = '/%s/%s/edited'>
-            <h1>Rename your Menu Item</h1>
-            <input name = 'edited menu item name' type = 'text' placeholder = '%s'>
-            <input type = 'submit' value = 'Submit'>
-        </form>
-    """ % (restaurant_id, menu_id, menu_name)
-    output += "<a href='/restaurants/'>return to listing</a>"
-    output += "</body></html>"
-    # return output
-    return "page to edit a menu item. Task 2 complete!"
+    output += render_template('editMenuItem.html',
+                              restaurant_id = restaurant_id,
+                              menuItem = item )
+    return output
+    # return "page to edit a menu item. Task 2 complete!"
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/')
@@ -101,13 +91,6 @@ def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
     output = render_template('page_head.html', title = "The Menu Manager")
     print "restaurants/delete accessed..."
-
-    print "restaurant_id sez: ", restaurant_id
-    restaurant = session.query(Restaurant).\
-        filter_by(id = restaurant_id).first()
-    print "restaurant query sez: ", restaurant
-    restaurant_name = restaurant.name
-    print "restaurant_name is: ", restaurant_name
 
     print "menu_id sez: ", menu_id
     item = session.query(MenuItem).\
