@@ -33,10 +33,6 @@ page_head = """
 # <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
 
 
-@app.route('/restaurants/')
-def index():
-    return redirect(url_for("restaurantMenu", restaurant_id="2"))
-
 @app.route('/restaurants/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
 
@@ -46,6 +42,11 @@ def restaurantMenu(restaurant_id):
     output = render_template('page_head.html', title = "The Menu Manager")
     output += render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
     return output
+
+
+@app.route('/restaurants/')
+def index():
+    return redirect(url_for("restaurantMenu", restaurant_id="2"))
 
 
 @app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
@@ -66,22 +67,17 @@ def newMenuItem(restaurant_id):
         return output
 
 
-@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/')
+@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
     output = render_template('page_head.html', title = "The Menu Manager")
-
     print "restaurants/restaurant_id/menu_id/edit accessed..."
-    print "menu_id sez: ", menu_id
-    item = session.query(MenuItem).\
-        filter_by(id = menu_id).first()
+    item = session.query(MenuItem).filter_by(id = menu_id).first()
     print "menuItem query sez: ", item
-    menu_name = item.name
-    print "menu_name is: ", menu_name
 
     output += render_template('editMenuItem.html',
                               restaurant_id = restaurant_id,
-                              menuItem = item )
+                              menu_id = item.id )
     return output
     # return "page to edit a menu item. Task 2 complete!"
 
