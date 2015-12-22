@@ -91,10 +91,11 @@ def editMenuItem(restaurant_id, menu_id):
         # return "page to edit a menu item. Task 2 complete!"
 
 
-@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/')
+@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
     if request.method == "POST":
+        print "deleteMenuItem POST triggered!, menu_id is: ", menu_id
         result = session.execute("""
                 DELETE FROM menu_item
                 WHERE id=:deleted_menu_item_id;
