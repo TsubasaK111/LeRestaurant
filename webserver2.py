@@ -8,7 +8,9 @@ from database_setup import Base, Restaurant, MenuItem
 import pdb
 import pprint
 
+
 app = Flask(__name__)
+
 
 engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
@@ -22,19 +24,22 @@ def index():
     restaurants = session.query(Restaurant).all()
     for restaurant in restaurants:
         menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
-        output += render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
+        output += render_template( 'menu.html',
+                                   restaurant=restaurant,
+                                   menuItems=menuItems )
         output += "<br>BREAKBREAKBREAK<br>"
     return output
 
 
 @app.route('/restaurants/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
-
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
     print "\nrestaurantMenu triggered: ", restaurant
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     output = render_template('page_head.html', title = "The Menu Manager")
-    output += render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
+    output += render_template( 'menu.html',
+                               restaurant=restaurant,
+                               menuItems=menuItems )
     return output
 
 
@@ -79,16 +84,12 @@ def editMenuItem(restaurant_id, menu_id):
     else:
         output = render_template('page_head.html', title = "The Menu Manager")
         print "\nrestaurants/restaurant_id/menu_id/edit accessed..."
-
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
-        print "menuItem name iz: ", menuItem.name
-
         output += render_template('editMenuItem.html',
                                   restaurant = restaurant,
                                   menuItem = menuItem )
         return output
-        # return "page to edit a menu item. Task 2 complete!"
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
@@ -103,23 +104,18 @@ def deleteMenuItem(restaurant_id, menu_id):
             """,
             {"deleted_menu_item_id": menu_id}
         )
-        print "result is: ", result
         session.commit()
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
 
     else:
-        output = render_template('page_head.html', title = "The Menu Manager")
         print "restaurants/delete accessed..."
-
+        output = render_template('page_head.html', title = "The Menu Manager")
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
-        print "menuItem query sez: ", menuItem
-
         output += render_template( 'deleteMenuItem.html',
                                    menuItem = menuItem,
                                    restaurant = restaurant )
         return output
-    # return "page to delete a menu item. Task 3 complete!"
 
 
 if __name__ == "__main__":
