@@ -1,11 +1,11 @@
 <h1>Delete your Menu Item</h1>
 
-<form action = {{ url_for('deleteMenuItem',restaurant_id=restaurant_id, menu_id=menu_id) }} method = 'POST' enctype = 'multipart/form-data' >
+<form action = {{ url_for('deleteMenuItem',restaurant_id=restaurant.id, menu_id=menuItem.id) }} method = 'POST' enctype = 'multipart/form-data' >
     <p> Are you sure you want to delete {{menuItem.name}}?</p>
     <input type = 'submit' value = 'Delete'>
 </form>
 
-<a href={{ url_for('restaurantMenu', restaurant_id=restaurant_id) }} >return to listing</a>
+<a href={{ url_for('restaurantMenu', restaurant_id=restaurant.id) }} >return to listing</a>
 
 </body>
 </html>

@@ -52,6 +52,7 @@ def index():
 @app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
     """page to create a new menu item."""
+
     if request.method == "POST":
         print "POST triggered, name is: ", request.form['name']
         newMenuItem = MenuItem( name=request.form['name'],
@@ -72,12 +73,14 @@ def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
     output = render_template('page_head.html', title = "The Menu Manager")
     print "restaurants/restaurant_id/menu_id/edit accessed..."
-    item = session.query(MenuItem).filter_by(id = menu_id).first()
-    print "menuItem query sez: ", item
+
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
+    print "menuItem query sez: ", menuItem
 
     output += render_template('editMenuItem.html',
-                              restaurant_id = restaurant_id,
-                              menu_id = item.id )
+                              restaurant = restaurant,
+                              menuItem = menuItem )
     return output
     # return "page to edit a menu item. Task 2 complete!"
 
@@ -88,22 +91,13 @@ def deleteMenuItem(restaurant_id, menu_id):
     output = render_template('page_head.html', title = "The Menu Manager")
     print "restaurants/delete accessed..."
 
-    print "menu_id sez: ", menu_id
-    item = session.query(MenuItem).\
-        filter_by(id = menu_id).first()
-    print "menuItem query sez: ", item
-    menu_name = item.name
-    print "menu_name is: ", menu_name
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
+    print "menuItem query sez: ", menuItem
 
-    output += """\n
-        <form method = 'POST' enctype = 'multipart/form-data' action = '/%s/%s/deleted'>
-            <h1>Delete your Menu Item</h1>
-            <p> Are you sure you want to delete '%s'?</p>
-            <input type = 'submit' value = 'Delete'>
-        </form>
-    """  % (restaurant_id, menu_id, menu_name)
-    output += "<a href='/restaurants/'>return to listing</a>"
-    output += "</body></html>"
+    output += render_template( 'deleteMenuItem.html',
+                               menuItem = menuItem,
+                               restaurant = restaurant )
     return output
     # return "page to delete a menu item. Task 3 complete!"
 
