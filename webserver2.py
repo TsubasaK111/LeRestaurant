@@ -54,8 +54,8 @@ def newMenuItem(restaurant_id):
     """page to create a new menu item."""
 
     if request.method == "POST":
-        print "POST triggered, name is: ", request.form['name']
-        newMenuItem = MenuItem( name=request.form['name'],
+        print "POST triggered, name is: ", request.form['new_name']
+        newMenuItem = MenuItem( name=request.form['new_name'],
                                 restaurant_id=restaurant_id )
         session.add(newMenuItem)
         session.commit()
@@ -71,18 +71,34 @@ def newMenuItem(restaurant_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
-    output = render_template('page_head.html', title = "The Menu Manager")
-    print "restaurants/restaurant_id/menu_id/edit accessed..."
 
-    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
-    menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
-    print "menuItem query sez: ", menuItem
+    if request.method == "POST":
+        print "POST triggered, name is: ", request.form['edited_name']
+        result = session.execute("""
+                UPDATE menu_item
+                SET name=:edited_name
+                WHERE id=:edited_menu_item_id;
+            """,
+            {"edited_name": request.form['edited_name'],
+            "edited_menu_item_id": menu_id}
+        )
+        print "result is: ", result
+        session.commit()
+        print "POST worked!"
+        return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
+    else:
+        output = render_template('page_head.html', title = "The Menu Manager")
+        print "restaurants/restaurant_id/menu_id/edit accessed..."
 
-    output += render_template('editMenuItem.html',
-                              restaurant = restaurant,
-                              menuItem = menuItem )
-    return output
-    # return "page to edit a menu item. Task 2 complete!"
+        restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+        menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
+        print "menuItem name iz: ", menuItem.name
+
+        output += render_template('editMenuItem.html',
+                                  restaurant = restaurant,
+                                  menuItem = menuItem )
+        return output
+        # return "page to edit a menu item. Task 2 complete!"
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/')
