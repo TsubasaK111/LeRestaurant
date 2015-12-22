@@ -31,7 +31,7 @@ def index():
 def restaurantMenu(restaurant_id):
 
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
-    print "restaurantMenu triggered: ", restaurant
+    print "\nrestaurantMenu triggered: ", restaurant
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     output = render_template('page_head.html', title = "The Menu Manager")
     output += render_template('menu.html', restaurant=restaurant, menuItems=menuItems)
@@ -43,7 +43,7 @@ def newMenuItem(restaurant_id):
     """page to create a new menu item."""
 
     if request.method == "POST":
-        print "newMenuItem POST triggered, name is: ", request.form['new_name']
+        print "\nnewMenuItem POST triggered, name is: ", request.form['new_name']
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         newMenuItem = MenuItem( name=request.form['new_name'],
                                 restaurant_id=restaurant.id )
@@ -51,6 +51,7 @@ def newMenuItem(restaurant_id):
         session.commit()
         print "POST worked!"
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant.id))
+
     else:
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         output = render_template('page_head.html', title = "The Menu Manager")
@@ -63,7 +64,7 @@ def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
 
     if request.method == "POST":
-        print "editMenuItem POST triggered, name is: ", request.form['edited_name']
+        print "\neditMenuItem POST triggered, name is: ", request.form['edited_name']
         result = session.execute("""
                 UPDATE menu_item
                 SET name=:edited_name
@@ -72,13 +73,12 @@ def editMenuItem(restaurant_id, menu_id):
             {"edited_name": request.form['edited_name'],
             "edited_menu_item_id": menu_id}
         )
-        print "result is: ", result
         session.commit()
-        print "POST worked!"
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
+
     else:
         output = render_template('page_head.html', title = "The Menu Manager")
-        print "restaurants/restaurant_id/menu_id/edit accessed..."
+        print "\nrestaurants/restaurant_id/menu_id/edit accessed..."
 
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
@@ -94,8 +94,9 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
+
     if request.method == "POST":
-        print "deleteMenuItem POST triggered!, menu_id is: ", menu_id
+        print "\ndeleteMenuItem POST triggered!, menu_id is: ", menu_id
         result = session.execute("""
                 DELETE FROM menu_item
                 WHERE id=:deleted_menu_item_id;
@@ -105,6 +106,7 @@ def deleteMenuItem(restaurant_id, menu_id):
         print "result is: ", result
         session.commit()
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
+
     else:
         output = render_template('page_head.html', title = "The Menu Manager")
         print "restaurants/delete accessed..."
