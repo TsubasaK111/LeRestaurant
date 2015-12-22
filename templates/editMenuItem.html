@@ -1,7 +1,7 @@
 <h1>Rename your Menu Item</h1>
 
 <form action = {{ url_for('editMenuItem',restaurant_id=restaurant.id, menu_id=menuItem.id) }} method = 'POST' enctype = 'multipart/form-data'>
-    <input name = 'new_name' type = 'text' placeholder = {{menuItem.name}}>
+    <input name = 'edited_name' type = 'text' placeholder = "{{ menuItem.name }}">
     <input type = 'submit' value = 'Rename'>
 </form>
 
