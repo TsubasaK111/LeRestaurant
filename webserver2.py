@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, flash
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -48,12 +48,14 @@ def newMenuItem(restaurant_id):
     """page to create a new menu item."""
 
     if request.method == "POST":
-        print "\nnewMenuItem POST triggered, name is: ", request.form['new_name']
+        new_name = request.form['new_name']
+        print "\nnewMenuItem POST triggered, name is: ", new_name
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
-        newMenuItem = MenuItem( name=request.form['new_name'],
+        newMenuItem = MenuItem( name=new_name,
                                 restaurant_id=restaurant.id )
         session.add(newMenuItem)
         session.commit()
+        flash( "new item '" + new_name + "' created!")
         print "POST worked!"
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant.id))
 
@@ -69,16 +71,20 @@ def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
 
     if request.method == "POST":
-        print "\neditMenuItem POST triggered, name is: ", request.form['edited_name']
+        edited_name = request.form['edited_name']
+        print "\neditMenuItem POST triggered, name is: ", edited_name
+        old_name = session.query(MenuItem).filter_by(id = menu_id).first().name
+
         result = session.execute("""
                 UPDATE menu_item
                 SET name=:edited_name
                 WHERE id=:edited_menu_item_id;
             """,
-            {"edited_name": request.form['edited_name'],
+            {"edited_name": edited_name,
             "edited_menu_item_id": menu_id}
         )
         session.commit()
+        flash( "item '" +  old_name + "' edited to '" + edited_name + "'. Jawohl!")
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
 
     else:
@@ -98,13 +104,10 @@ def deleteMenuItem(restaurant_id, menu_id):
 
     if request.method == "POST":
         print "\ndeleteMenuItem POST triggered!, menu_id is: ", menu_id
-        result = session.execute("""
-                DELETE FROM menu_item
-                WHERE id=:deleted_menu_item_id;
-            """,
-            {"deleted_menu_item_id": menu_id}
-        )
+        deletedMenuItem = session.query(MenuItem).filter_by(id = menu_id).first()
+        session.delete(deletedMenuItem)
         session.commit()
+        flash( "item '" + deletedMenuItem.name + "' deleted. Auf Wiedersehen!")
         return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
 
     else:
@@ -119,5 +122,6 @@ def deleteMenuItem(restaurant_id, menu_id):
 
 
 if __name__ == "__main__":
+    app.secret_key = "ZUPA_SECRET_KEY!!!"
     app.debug = True
     app.run(host = "0.0.0.0", port = 5000)
