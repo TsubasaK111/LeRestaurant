@@ -1,0 +1,39 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Restaurant Menu App Login</title>
+    <!-- Bootstrap 3 Online -->
+    <!-- <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css"> -->
+
+    <!-- Bootstrap 3 offline -->
+    <link rel=stylesheet type = text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-theme.min.css') }}" >
+
+    <!--creates anonymous function to insert script into DOM into this page  -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+    </script>
+
+</head>
+<body>
+
+  <!-- client id obtained from: -->
+  <!--  https://console.developers.google.com/apis/credentials?project=restaurant-menu-appp -->
+  <div id="signinButton">
+    <span class="g-signin"
+      data-scope="openid"
+      data-clientid="26472003279-pkmnfsbkfpi3pu5d4bogmsruneu899ia.apps.googleusercontent.com"
+      data-redirecturi="postmessage"
+      data-accesstype="offline"
+      data-cookiepolicy="single_host_origin"
+      data-callback="signInCallback"
+      data-approvalprompt="force">
+    </span>
+  </div>
+
+  <div id="result"></div>
+
+</body>
+</html>
