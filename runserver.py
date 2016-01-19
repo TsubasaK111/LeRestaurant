@@ -1,5 +1,8 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, jsonify
 
+from flask import session as flask_session
+import random, string
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -16,6 +19,16 @@ engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
 DatabaseSession = sessionmaker(bind = engine)
 session = DatabaseSession()
+
+
+@app.route('/login/')
+def login():
+    def random_string():
+        return (random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    print random_string()
+    state = ''.join(random_string())
+    flask_session['state'] = state
+    return "The current session state is %s" %flask_session['state']
 
 
 @app.route('/restaurants/')
