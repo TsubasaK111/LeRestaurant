@@ -1,18 +1,33 @@
+# Webserver Dependencies
 from flask import Flask, render_template, url_for, request, redirect, flash, jsonify
 
-from flask import session as flask_session
-import random, string
-
+# Database Dependencies
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
 from database_setup import Base, Restaurant, MenuItem
 
+# Authentication Dependencies
+from flask import session as flask_session
+import random, string
+from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
+import httplib2
+import json
+from flask import make_response
+import requests
+
+# Debugging Dependencies
 import pdb
 import pprint
 
 
 app = Flask(__name__)
+
+# Open json file containing secrets obtained from Google API Manager and
+# store the client ID inside. CLIENT_ID and other secrets generated at:
+# https://console.developers.google.com/apis/credentials?project=restaurant-menu-appp
+CLIENT_ID = json.loads(
+    open("client_secrets.json", "r").read()
+)["web"]["client_id"]
 
 
 engine = create_engine('sqlite:///restaurantmenu.db')
@@ -23,6 +38,9 @@ session = DatabaseSession()
 
 @app.route('/login/')
 def login():
+    """ login page.
+        * generates a random "state" string and
+        * pushes state when authorizing with OAuth (gconnect)."""
     def random_string():
         return (random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
     print random_string()
@@ -31,6 +49,58 @@ def login():
     output = render_template( 'login.html',
                               state = flask_session['state'] )
     return output
+
+
+@app.route('/gconnect', methods=['POST'])
+def gconnect():
+    """ responds to /login/'s login attempt with OAuth (gconnect).
+        * checks if 'state' is concurrent.
+        * kicks you out if not concurrent.
+        * attempts to upgrade/exchange 'authorization code'(aka secrets) with credentials object. """
+    if request.args.get('state') != flask_session['state']:
+        response = make_response(json.dumps('Invalid state detected!'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    code = request.data
+    try:
+        # create flow object and add secrets.
+        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+        # declares this as the one-time-code flow (via postmessage) that server will send.
+        oauth_flow.redirect_uri = 'postmessage'
+        # initiate exchange with flow and code (aka state and secrets info)
+        credentials = oauth_flow.setup2_exchange(code)
+    except FlowExchangeError:
+        response = make_response(
+            json.dumps('Failed to upgrade authorization code!'), 401 )
+        response.headers['Content-Type']='application/json'
+        return response
+
+    # Check if access token is valid by sending url with token to google.
+    access_token = credentials.access_token
+    url = (
+        'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+        % access_token )
+    connection = httplib2.Http()
+    result = json.loads(connection.request(url, 'GET')[1])
+    # If error in access token info, abort!
+    if result.get('error') is not None:
+        response = make_response(json.dumps(result.get('error')), 50)
+        response.headers['Content-Type']='application/json'
+    # Verify that access token is used for intended user.
+    google_plus_id = credentials.id_token['sub']
+    if result['user_id'] != google_plus_id:
+        response = make_response(
+            json.dumps("Token's user ID doesn't match given user ID. WUDDAYA DOIN!?!?!?"), 401 )
+        response.headers['Content-Type']='application/json'
+        return response
+    if result['issued_to'] != CLIENT_ID:
+        response = make_response(
+            json.dumps("Token's client ID doesn't match app's ID... (inquisitive face)"), 401 )
+        print "Token's client ID doesn not match app's ID."
+        response.headers['Content-Type']='application/json'
+        return response
+
+
 
 @app.route('/restaurants/')
 def index():

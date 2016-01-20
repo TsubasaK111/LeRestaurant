@@ -23,7 +23,7 @@
   <!--  https://console.developers.google.com/apis/credentials?project=restaurant-menu-appp -->
   <div id="sessionDebug">
     The current session state is {{ state }}
-  <div id="signinButton">
+  <div id="signInButton">
     <span class="g-signin"
       data-scope="openid"
       data-clientid="26472003279-pkmnfsbkfpi3pu5d4bogmsruneu899ia.apps.googleusercontent.com"
@@ -37,5 +37,41 @@
 
   <div id="result"></div>
 
+  <script>
+    function signInCallback(authorizationResult){
+      // If server responds, do the following:
+      if (authorizationResult['code']) {
+        // Hide the sign-in button, as the user is now authorized.
+        $("#signInButton").attr("style","display: none");
+        // Send "one-time-use code" via POST to server.
+        $.ajax({
+          type: "POST",
+          url: "/gconnect?state={{ state }}",
+          processData: false,
+          contentType: "application/octet-stream; charset=utf-8",
+          data: authorizationResult["code"],
+          success: function(result) {
+            // If POST is accepted (we get a 200/OK/success),
+            // display server's response and redirect to /restaurants page
+            //  after 4 secs.
+            if (result) {
+              $("#result").html(
+                "SUCCESS, DUDES!! Result is:</br>"+result+"</br>Redirecting..."
+              )
+              setTimeout(function(){
+                window.location.href="/restaurant";
+              }, 4000);
+            } else if (authorizationResult['error']) {
+              // If google responds with an error, display it.
+              console.log("There was an error: "+authorizationResult['error']);
+            } else {
+              // If we don't get a response (sadface!!!):
+              $("#result").html("Failed to make server-side call. Check config and console (sadface) ");
+            }
+          }
+        });
+      }
+    }
+  </script>
 </body>
 </html>
