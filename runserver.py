@@ -28,8 +28,8 @@ def login():
     print random_string()
     state = ''.join(random_string())
     flask_session['state'] = state
-    output = render_template('login.html')
-    output += "The current session state is %s" %flask_session['state']
+    output = render_template( 'login.html',
+                              state = flask_session['state'] )
     return output
 
 @app.route('/restaurants/')
