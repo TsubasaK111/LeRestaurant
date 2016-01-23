@@ -18,6 +18,7 @@ import requests
 # Debugging Dependencies
 import pdb
 import pprint
+import inspect
 
 
 app = Flask(__name__)
@@ -177,9 +178,12 @@ def google_disconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
+@app.route('/')
+def index():
+    return redirect('/restaurants/')
 
 @app.route('/restaurants/')
-def index():
+def restaurants():
     output = render_template('page_head.html', title = "The Menu Manager")
     restaurants = session.query(Restaurant).all()
     for restaurant in restaurants:
@@ -203,9 +207,17 @@ def restaurantMenu(restaurant_id):
     return output
 
 
+def logInRedirect():
+    """redirect routes to the login page."""
+    thisFunction = inspect.stack()[1][3]
+    flash("It appears you're not logged in. Log in to access " + thisFunction + ".")
+    return redirect('/login')
+
 @app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
     """page to create a new menu item."""
+    if 'access_token' not in flask_session:
+        return logInRedirect()
 
     if request.method == "POST":
         new_name = request.form['new_name']
@@ -229,6 +241,8 @@ def newMenuItem(restaurant_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
+    if 'access_token' not in flask_session:
+        return logInRedirect()
 
     if request.method == "POST":
         edited_name = request.form['edited_name']
@@ -261,6 +275,8 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
+    if 'access_token' not in flask_session:
+        return logInRedirect()
 
     if request.method == "POST":
         print "\ndeleteMenuItem POST triggered!, menu_id is: ", menu_id
