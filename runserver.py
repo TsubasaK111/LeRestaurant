@@ -178,9 +178,18 @@ def google_disconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
+
+def logInRedirect():
+    """redirect routes to the login page."""
+    thisFunction = inspect.stack()[1][3]
+    flash("It appears you're not logged in. Log in to access " + thisFunction + ".")
+    return redirect('/login')
+
+
 @app.route('/')
 def index():
     return redirect('/restaurants/')
+
 
 @app.route('/restaurants/')
 def restaurants():
@@ -206,12 +215,6 @@ def restaurantMenu(restaurant_id):
                                menuItems=menuItems )
     return output
 
-
-def logInRedirect():
-    """redirect routes to the login page."""
-    thisFunction = inspect.stack()[1][3]
-    flash("It appears you're not logged in. Log in to access " + thisFunction + ".")
-    return redirect('/login')
 
 @app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
