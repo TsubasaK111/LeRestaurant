@@ -145,6 +145,39 @@ def google_connect():
 
     return output
 
+@app.route('/google_disconnect')
+def google_disconnect():
+    # Only disconnect a connected user.
+    access_token = flask_session.get('access_token')
+    if access_token is None:
+        response = make_response(
+                    json.dumps('This user is not connected.'), 401 )
+        response.headers['Content-Type'] =  'application/json'
+        return response
+    # Send GET request to revoke current token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token={access_token}'.\
+        format( access_token =  access_token )
+    result = httplib2.Http().request(url, 'GET')[0]
+    if result['status'] == '200':
+        pdb.set_trace()
+        del flask_session['access_token']
+        del flask_session['google_plus_id']
+        del flask_session['username']
+        del flask_session['picture']
+        del flask_session['link']
+        # del flask_session['email']
+
+        response = make_response(json.dumps('Goodbye! Till Next Time!!'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    else:
+        # If this session's token was invalid
+        response = make_response(
+                    json.dumps("!!! Unable to revoke user's token!"), 400 )
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+
 @app.route('/restaurants/')
 def index():
     output = render_template('page_head.html', title = "The Menu Manager")
