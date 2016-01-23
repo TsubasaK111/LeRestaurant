@@ -40,9 +40,10 @@ session = DatabaseSession()
 def login():
     """ login page.
         * generates a random "state" string and
-        * pushes state when authorizing with OAuth (gconnect)."""
+        * pushes state when authorizing with OAuth (google_connect)."""
     def random_string():
-        return (random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+        return ( random.choice(string.ascii_uppercase + string.digits)
+            for x in xrange(32) )
     print random_string()
     state = ''.join(random_string())
     flask_session['state'] = state
@@ -51,24 +52,27 @@ def login():
     return output
 
 
-@app.route('/gconnect', methods=['POST'])
-def gconnect():
-    """ responds to /login/'s login attempt with OAuth (gconnect).
+@app.route('/google_connect', methods=['POST'])
+def google_connect():
+    """ responds to /login/'s login attempt with OAuth (google_connect).
         * checks if 'state' is concurrent.
         * kicks you out if not concurrent.
-        * attempts to upgrade/exchange 'authorization code'(aka secrets) with credentials object. """
+        * attempts to upgrade/exchange 'authorization code'(aka secrets) with credentials object, which has access token. """
+
     if request.args.get('state') != flask_session['state']:
         response = make_response(json.dumps('Invalid state detected!'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     code = request.data
+
     try:
         # create flow object and add secrets.
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
         # declares this as the one-time-code flow (via postmessage) that server will send.
         oauth_flow.redirect_uri = 'postmessage'
+
         # initiate exchange with flow and code (aka state and secrets info)
-        credentials = oauth_flow.setup2_exchange(code)
+        credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
         response = make_response(
             json.dumps('Failed to upgrade authorization code!'), 401 )
@@ -77,15 +81,17 @@ def gconnect():
 
     # Check if access token is valid by sending url with token to google.
     access_token = credentials.access_token
-    url = (
+    access_token_validation_url = (
         'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
         % access_token )
     connection = httplib2.Http()
-    result = json.loads(connection.request(url, 'GET')[1])
-    # If error in access token info, abort!
+    result = json.loads(connection.request(access_token_validation_url, 'GET')[1])
+
+    # Check if error in access token info. If so, abort!
     if result.get('error') is not None:
         response = make_response(json.dumps(result.get('error')), 50)
         response.headers['Content-Type']='application/json'
+
     # Verify that access token is used for intended user.
     google_plus_id = credentials.id_token['sub']
     if result['user_id'] != google_plus_id:
@@ -93,14 +99,51 @@ def gconnect():
             json.dumps("Token's user ID doesn't match given user ID. WUDDAYA DOIN!?!?!?"), 401 )
         response.headers['Content-Type']='application/json'
         return response
+
+    # Verify that client ID in token matches that of this web app.
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID doesn't match app's ID... (inquisitive face)"), 401 )
-        print "Token's client ID doesn not match app's ID."
         response.headers['Content-Type']='application/json'
         return response
 
+    # Check if user already logged in.
+    stored_access_token = flask_session.get('access_token')
+    stored_google_plus_id = flask_session.get('google_plus_id')
 
+    if stored_access_token is not None and google_plus_id == stored_google_plus_id:
+        print "stored_access_token"
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200 )
+        response.headers['Content-Type']='application/json'
+
+    # Store access token in session for later use.
+    flask_session['access_token']=credentials.access_token
+    flask_session['google_plus_id']=google_plus_id
+
+    # Get user info
+    userinfo_url="https://www.googleapis.com/oauth2/v1/userinfo"
+    parameters = { 'access_token': credentials.access_token, 'alt':'json' }
+    answer = requests.get(userinfo_url, params = parameters)
+
+    data = answer.json()
+
+    flask_session['username'] = data['name']
+    flask_session['picture'] = data['picture']
+    flask_session['link'] = data['link']
+    # flask_session['email'] = data['email']
+
+    # Render user info
+    output = render_template("page_head.html", title= "Login Results")
+    output += """ <h1>Welcome, {username}!</h1>
+                   <img src="{picture}">
+              """.format( username = flask_session['username'],
+                          picture = flask_session['picture'] )
+    output += "</body></html>"
+    flash("You are now logged in as: {username}".format(
+            username = flask_session['username'] ))
+
+    return output
 
 @app.route('/restaurants/')
 def index():
