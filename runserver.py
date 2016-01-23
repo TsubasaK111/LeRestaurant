@@ -4,7 +4,7 @@ from flask import Flask, render_template, url_for, request, redirect, flash, jso
 # Database Dependencies
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Restaurant, MenuItem
+from database_setup import Base, User, Restaurant, MenuItem
 
 # Authentication Dependencies
 from flask import session as flask_session
