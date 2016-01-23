@@ -8,17 +8,19 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'user'
-    name    = Column( String(80), nullable = False )
-    email   = Column( String() )
-    picture = Column( String() )
-    id      = Column( Integer, primary_key = True )
+    name          = Column( String(80), nullable = False )
+    email         = Column( String() )
+    picture       = Column( String() )
+    link          = Column( String() )
+    id            = Column( Integer, primary_key = True )
 
 
 class Restaurant(Base):
     __tablename__ = 'restaurant'
-    name    = Column( String(80), nullable = False )
-    id      = Column( Integer, primary_key = True )
-    user_id = Column( Integer, ForeignKey('user.id') )
+    name          = Column( String(80), nullable = False )
+    id            = Column( Integer, primary_key = True )
+    user_id       = Column( Integer, ForeignKey('user.id') )
+    user          = relationship(User)
     @property
     def serialize(self):
         #Returns object data in easily serializeable format.
@@ -28,15 +30,16 @@ class Restaurant(Base):
         }
 
 class MenuItem(Base):
-    __tablename__='menu_item'
-    name = Column( String(80), nullable = False )
-    course = Column( String(250) )
-    description = Column( String(250) )
-    price = Column( String(8) )
-    id = Column( Integer, primary_key = True )
-    user_id = Column( Integer, ForeignKey('user.id') )
+    __tablename__ = 'menu_item'
+    name          = Column( String(80), nullable = False )
+    course        = Column( String(250) )
+    description   = Column( String(250) )
+    price         = Column( String(8) )
+    id            = Column( Integer, primary_key = True )
+    user_id       = Column( Integer, ForeignKey('user.id') )
     restaurant_id = Column( Integer, ForeignKey('restaurant.id') )
-    restaurant = relationship(Restaurant)
+    restaurant    = relationship(Restaurant)
+    user          = relationship(User)
     @property
     def serialize(self):
         #Returns object data in easily serializeable format.

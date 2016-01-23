@@ -160,7 +160,6 @@ def google_disconnect():
         format( access_token =  access_token )
     result = httplib2.Http().request(url, 'GET')[0]
     if result['status'] == '200':
-        pdb.set_trace()
         del flask_session['access_token']
         del flask_session['google_plus_id']
         del flask_session['username']
