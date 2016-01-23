@@ -185,6 +185,24 @@ def logInRedirect():
     return redirect('/login')
 
 
+def createUser(flask_session):
+    newUser = User( name = flask_session['username'],
+                    picture = flask_session['picture'],
+                    link = flask_session['link'],
+                    email = flask_session['email'] )
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(link = flask_session['link']).one()
+    return user.id
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id = user_id).one()
+    return user
+
+# def getUserID(email):
+
+
+
 @app.route('/')
 def index():
     return redirect('/restaurants/')
