@@ -124,26 +124,22 @@ def google_connect():
 
     # Get user info
     userinfo_url="https://www.googleapis.com/oauth2/v1/userinfo"
-    parameters = { 'access_token': credentials.access_token, 'alt':'json' }
+    parameters = { 'access_token':credentials.access_token, 'alt':'json' }
     answer = requests.get(userinfo_url, params = parameters)
 
     data = answer.json()
 
     flask_session['username'] = data['name']
     flask_session['picture'] = data['picture']
-    try:
-        flask_session['link'] = data['link']
-    except:
-        flask_session['link'] = ""
+    try:    flask_session['link'] = data['link']
+    except: flask_session['link'] = ""
     try:
         flask_session['email'] = data['email']
         user_id = getUserIdFromEmail(flask_session['email'])
     except:
         flask_session['email'] = ""
-        try:
-            user_id = getUserIdFromGooglePlusLink(flask_session['link'])
-        except:
-            user_id = createUser(flask_session)
+        try:    user_id = getUserIdFromLink(flask_session['link'])
+        except: user_id = createUser(flask_session)
 
     user_info_from_db = getUserInfo(user_id)
     pdb.set_trace()
@@ -153,10 +149,10 @@ def google_connect():
     output += """ <h1>Welcome, {username}!</h1>
                    <img src="{picture}">
               """.format( username = flask_session['username'],
-                          picture = flask_session['picture'] )
+                          picture  = flask_session['picture'] )
     output += "</body></html>"
-    flash("You are now logged in as: {username}".format(
-            username = flask_session['username'] ))
+    flash("You are now logged in as: {username}".\
+            format(username = flask_session['username'] ))
 
     return output
 
@@ -179,7 +175,7 @@ def google_disconnect():
         del flask_session['username']
         del flask_session['picture']
         del flask_session['link']
-        # del flask_session['email']
+        del flask_session['email']
 
         response = make_response(json.dumps('Goodbye! Till Next Time!!'), 200)
         response.headers['Content-Type'] = 'application/json'
@@ -218,7 +214,7 @@ def getUserIdFromEmail(email):
     user_id = session.query(User).filter_by(email = email).one()
     return user_id
 
-def getUserIdFromGooglePlusLink(link):
+def getUserIdFromLink(link):
     user_id = session.query(User).filter_by(link = link).one()
     return user_id
 
