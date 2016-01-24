@@ -173,7 +173,7 @@ def google_disconnect():
     else:
         # If this session's token was invalid
         response = make_response(
-                    json.dumps("!!! Unable to revoke user's token!"), 400 )
+                    json.dumps("!!! Unable to revoke user's token !!!"), 400 )
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -199,8 +199,13 @@ def getUserInfo(user_id):
     user = session.query(User).filter_by(id = user_id).one()
     return user
 
-# def getUserID(email):
+def getUserIdFromEmail(email):
+    user_id = session.query(User).filter_by(email = email).one()
+    return user_id
 
+def getUserIdFromGooglePlusLink(link):
+    user_id = session.query(link).filter_by(link = link).one()
+    return user_id
 
 
 @app.route('/')
