@@ -131,8 +131,22 @@ def google_connect():
 
     flask_session['username'] = data['name']
     flask_session['picture'] = data['picture']
-    flask_session['link'] = data['link']
-    # flask_session['email'] = data['email']
+    try:
+        flask_session['link'] = data['link']
+    except:
+        flask_session['link'] = ""
+    try:
+        flask_session['email'] = data['email']
+        user_id = getUserIdFromEmail(flask_session['email'])
+    except:
+        flask_session['email'] = ""
+        try:
+            user_id = getUserIdFromGooglePlusLink(flask_session['link'])
+        except:
+            user_id = createUser(flask_session)
+
+    user_info_from_db = getUserInfo(user_id)
+    pdb.set_trace()
 
     # Render user info
     output = render_template("page_head.html", title= "Login Results")
@@ -195,6 +209,7 @@ def createUser(flask_session):
     user = session.query(User).filter_by(link = flask_session['link']).one()
     return user.id
 
+
 def getUserInfo(user_id):
     user = session.query(User).filter_by(id = user_id).one()
     return user
@@ -204,7 +219,7 @@ def getUserIdFromEmail(email):
     return user_id
 
 def getUserIdFromGooglePlusLink(link):
-    user_id = session.query(link).filter_by(link = link).one()
+    user_id = session.query(User).filter_by(link = link).one()
     return user_id
 
 
