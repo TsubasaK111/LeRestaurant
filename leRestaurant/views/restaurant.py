@@ -4,7 +4,7 @@ from flask import Flask, render_template, url_for, request, redirect, flash, jso
 from leRestaurant import app
 
 # Database Dependencies
-from leRestaurant.models import session, User, Restaurant, MenuItem
+from leRestaurant.models import session, Restaurant, MenuItem
 
 # Debugging Dependencies
 import pdb, pprint, inspect
