@@ -4,6 +4,8 @@
 #wtf is this anyways? :P
 *.DS_Store
 
+#old files being kept just for safety sake.
+*.old.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -56,12 +58,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-
-# databases:
-*.db
-
-# wtf is this anyways?
-.DS_STORE
 
 # Sphinx documentation
 docs/_build/
