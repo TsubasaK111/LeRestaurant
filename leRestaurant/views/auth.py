@@ -200,25 +200,12 @@ def getUserInfo(user_id):
     user = session.query(User).filter_by(id = user_id).one()
     return user
 
+
 def getUserIdFromEmail(email):
     user_id = session.query(User).filter_by(email = email).one()
     return user_id
 
+
 def getUserIdFromLink(link):
     user_id = session.query(User).filter_by(link = link).one()
     return user_id
-
-#Another attempt at an API endpoint (GET Req)
-@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON/')
-def menuItemJSON(restaurant_id, menu_id):
-    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
-    menuItem = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).filter_by(id = menu_id).one()
-    return jsonify(MenuItem = menuItem.serialize)
-
-
-#A first attempt at an API endpoint (GET Req)
-@app.route('/restaurants/<int:restaurant_id>/menu/JSON/')
-def restaurantMenuJSON(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
-    menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).all()
-    return jsonify(MenuItems = [menuItem.serialize for menuItem in menuItems])
