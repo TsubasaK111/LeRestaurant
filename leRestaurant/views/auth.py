@@ -57,7 +57,7 @@ def google_connect():
 
     try:
         # create flow object and add secrets.
-        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+        oauth_flow = flow_from_clientsecrets('leRestaurant/client_secrets.json', scope='')
         # declares this as the one-time-code flow (via postmessage) that server will send.
         oauth_flow.redirect_uri = 'postmessage'
 
