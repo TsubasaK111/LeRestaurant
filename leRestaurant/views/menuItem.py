@@ -123,7 +123,7 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
-    
+
     if 'access_token' not in flask_session:
         return logInRedirect()
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()

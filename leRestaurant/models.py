@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = 'user'
     name          = Column( String(80), nullable = False )
@@ -21,7 +22,7 @@ class Restaurant(Base):
     __tablename__ = 'restaurant'
     name          = Column( String(80), nullable = False )
     id            = Column( Integer, primary_key = True )
-    user_id       = Column( Integer, ForeignKey('user.id') )
+    user_id       = Column( Integer, ForeignKey('user.id'), nullable = False )
     user          = relationship(User)
     @property
     def serialize(self):
@@ -30,6 +31,7 @@ class Restaurant(Base):
             'name': self.name,
             'id': self.id,
         }
+
 
 class MenuItem(Base):
     __tablename__ = 'menu_item'
@@ -45,22 +47,18 @@ class MenuItem(Base):
     @property
     def serialize(self):
         #Returns object data in easily serializeable format.
-        return {
-            'name': self.name,
-            'id': self.id,
-            'description': self.description,
-            'price': self.price,
-            'restaurant_id': self.restaurant_id,
-        }
+        return { 'name': self.name,
+                 'id': self.id,
+                 'description': self.description,
+                 'price': self.price,
+                 'restaurant_id': self.restaurant_id
+                }
 
 
 engine = create_engine('sqlite:///restaurantmenu.db')
 
 
 Base.metadata.create_all(engine)
-
-
-#Base.metadata.bind = engine
 
 
 DatabaseSession = sessionmaker(bind = engine)
