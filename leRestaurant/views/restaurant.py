@@ -24,7 +24,7 @@ def index():
 
 @app.route('/restaurants/')
 def showRestaurants():
-    return redirect('restaurants/public'))
+    return redirect('restaurants/public')
 
 @app.route('/restaurants/public')
 def publicRestaurants():

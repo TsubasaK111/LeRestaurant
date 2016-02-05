@@ -22,6 +22,7 @@ def newMenuItem(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
     user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
     if not restaurant.user_id == user_id:
+        flash("Only restaurant owners can add new items.")
         return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
 
     if request.method == "POST":
@@ -68,7 +69,6 @@ def showMenu(restaurant_id):
     if not restaurant.user_id == user_id:
         return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
 
-    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     creator = getUserInfo(restaurant.user_id)
 
@@ -91,6 +91,7 @@ def editMenuItem(restaurant_id, menu_id):
     user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
     if not restaurant.user_id == user_id:
         return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
+        flash("Only restaurant owners can edit items.")
 
     if request.method == "POST":
         edited_name = request.form['edited_name']
@@ -122,11 +123,13 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
-    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
-    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
+    
     if 'access_token' not in flask_session:
         return logInRedirect()
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
     if not restaurant.user_id == user_id:
+        flash("Only restaurant owners can delete items.")
         return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
 
     if request.method == "POST":
