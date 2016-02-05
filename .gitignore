@@ -5,7 +5,7 @@
 *.DS_Store
 
 #old files being kept just for safety sake.
-*.old.py
+*.old.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -131,7 +131,6 @@ def google_connect():
         except: user_id = createUser(flask_session)
 
     user_info_from_db = getUserInfo(user_id)
-    pdb.set_trace()
 
     # Render user info
     output = render_template("page_head.html", title= "Login Results")
@@ -196,16 +195,15 @@ def createUser(flask_session):
 
 
 def getUserInfo(user_id):
-    pdb.set_trace()
     user = session.query(User).filter_by(id = user_id).one()
     return user
 
 
 def getUserIdFromEmail(email):
-    user_id = session.query(User).filter_by(email = email).one()
-    return user_id
+    user = session.query(User).filter_by(email = email).one()
+    return user.id
 
 
 def getUserIdFromLink(link):
-    user_id = session.query(User).filter_by(link = link).one()
-    return user_id
+    user= session.query(User).filter_by(link = link).one()
+    return user.id

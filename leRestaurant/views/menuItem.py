@@ -6,8 +6,9 @@ from leRestaurant import app
 # Database Dependencies
 from leRestaurant.models import session, Restaurant, MenuItem
 
-# Authentication Dependencies
+# Auth Dependencies
 from flask import session as flask_session
+from auth import *
 
 # Debugging Dependencies
 import pdb, pprint, inspect
@@ -29,13 +30,42 @@ def newMenuItem(restaurant_id):
         session.commit()
         flash( "new item '" + new_name + "' created!")
         print "POST worked!"
-        return redirect(url_for("restaurantMenu", restaurant_id=restaurant.id))
+        return redirect(url_for("showMenu", restaurant_id=restaurant.id))
 
     else:
         restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         output = render_template('page_head.html', title = "The Menu Manager")
         output += render_template('newMenuItem.html', restaurant = restaurant)
         return output
+
+@app.route('/restaurants/<int:restaurant_id>/public')
+def publicMenu(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
+    creator = getUserInfo(restaurant.user_id)
+
+    print "\n publicMenu triggered: ", restaurant
+
+    # pdb.set_trace()
+    output = render_template( 'publicMenu.html',
+                              menuItems = menuItems,
+                              restaurant = restaurant,
+                              creator= creator )
+    return output
+
+@app.route('/restaurants/<int:restaurant_id>/')
+def showMenu(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
+    creator = getUserInfo(restaurant.user_id)
+
+    print "\nrestaurantMenu triggered: ", restaurant
+
+    output = render_template('page_head.html', title = "The Menu Manager")
+    output += render_template( 'menu.html',
+                               restaurant=restaurant,
+                               menuItems=menuItems )
+    return output
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/', methods=['GET', 'POST'])
@@ -59,7 +89,7 @@ def editMenuItem(restaurant_id, menu_id):
         )
         session.commit()
         flash( "item '" +  old_name + "' edited to '" + edited_name + "'. Jawohl!")
-        return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
+        return redirect(url_for("showMenu", restaurant_id=restaurant_id))
 
     else:
         output = render_template('page_head.html', title = "The Menu Manager")
@@ -84,7 +114,7 @@ def deleteMenuItem(restaurant_id, menu_id):
         session.delete(deletedMenuItem)
         session.commit()
         flash( "item '" + deletedMenuItem.name + "' deleted. Auf Wiedersehen!")
-        return redirect(url_for("restaurantMenu", restaurant_id=restaurant_id))
+        return redirect(url_for("showMenu", restaurant_id=restaurant_id))
 
     else:
         print "restaurants/delete accessed..."
