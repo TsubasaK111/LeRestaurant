@@ -13,6 +13,7 @@ class User(Base):
     email         = Column( String() )
     picture       = Column( String() )
     link          = Column( String() )
+    google_plus_id= Column( String() )
     id            = Column( Integer, primary_key = True )
 
 

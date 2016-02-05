@@ -15,6 +15,9 @@
   {% endwith %}
 
   <div>
+    <p>The business owner is: {{creator.name}}</p>
+  </div>
+  <div>
     <p>Create a   <a href={{ url_for('newMenuItem', restaurant_id=restaurant.id) }}>New</a>  Menu Item</p>
   </div>
 

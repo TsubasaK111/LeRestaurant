@@ -127,7 +127,7 @@ def google_connect():
         user_id = getUserIdFromEmail(flask_session['email'])
     except:
         flask_session['email'] = ""
-        try:    user_id = getUserIdFromLink(flask_session['link'])
+        try:    user_id = getUserIdFromGooglePlusID(flask_session['google_plus_id'])
         except: user_id = createUser(flask_session)
 
     user_info_from_db = getUserInfo(user_id)
@@ -187,10 +187,11 @@ def createUser(flask_session):
     newUser = User( name = flask_session['username'],
                     picture = flask_session['picture'],
                     link = flask_session['link'],
-                    email = flask_session['email'] )
+                    email = flask_session['email'],
+                    google_plus_id = flask_session['google_plus_id'] )
     session.add(newUser)
     session.commit()
-    user = session.query(User).filter_by(link = flask_session['link']).one()
+    user = session.query(User).filter_by(google_plus_id = flask_session['google_plus_id']).one()
     return user.id
 
 
@@ -198,12 +199,19 @@ def getUserInfo(user_id):
     user = session.query(User).filter_by(id = user_id).one()
     return user
 
+def getUserId(email, google_plus_id):
+    try:
+        user_id = getUserIdFromEmail(email)
+    except:
+        try:    user_id = getUserIdFromGooglePlusID(google_plus_id)
+        except: user_id = None
+    return user_id
 
 def getUserIdFromEmail(email):
     user = session.query(User).filter_by(email = email).one()
     return user.id
 
 
-def getUserIdFromLink(link):
-    user= session.query(User).filter_by(link = link).one()
+def getUserIdFromGooglePlusID(google_plus_id):
+    user= session.query(User).filter_by(google_plus_id = google_plus_id).one()
     return user.id

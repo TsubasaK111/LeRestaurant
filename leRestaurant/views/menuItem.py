@@ -7,7 +7,6 @@ from leRestaurant import app
 from leRestaurant.models import session, Restaurant, MenuItem
 
 # Auth Dependencies
-from flask import session as flask_session
 from auth import *
 
 # Debugging Dependencies
@@ -17,13 +16,17 @@ import pdb, pprint, inspect
 @app.route('/restaurants/<int:restaurant_id>/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
     """page to create a new menu item."""
+
     if 'access_token' not in flask_session:
         return logInRedirect()
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
+    if not restaurant.user_id == user_id:
+        return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
 
     if request.method == "POST":
         new_name = request.form['new_name']
         print "\nnewMenuItem POST triggered, name is: ", new_name
-        restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         newMenuItem = MenuItem( name=new_name,
                                 restaurant_id=restaurant.id )
         session.add(newMenuItem)
@@ -33,20 +36,21 @@ def newMenuItem(restaurant_id):
         return redirect(url_for("showMenu", restaurant_id=restaurant.id))
 
     else:
-        restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         output = render_template('page_head.html', title = "The Menu Manager")
         output += render_template('newMenuItem.html', restaurant = restaurant)
         return output
 
 @app.route('/restaurants/<int:restaurant_id>/public')
 def publicMenu(restaurant_id):
+    """ displays all menu items for a restaurant id, read-only."""
+
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     creator = getUserInfo(restaurant.user_id)
 
     print "\n publicMenu triggered: ", restaurant
 
-    # pdb.set_trace()
+
     output = render_template( 'publicMenu.html',
                               menuItems = menuItems,
                               restaurant = restaurant,
@@ -55,6 +59,15 @@ def publicMenu(restaurant_id):
 
 @app.route('/restaurants/<int:restaurant_id>/')
 def showMenu(restaurant_id):
+    """ displays all menu items for a restaurant id, with all CRUD options."""
+
+    if 'access_token' not in flask_session:
+        return logInRedirect()
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
+    if not restaurant.user_id == user_id:
+        return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
+
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     creator = getUserInfo(restaurant.user_id)
@@ -71,8 +84,13 @@ def showMenu(restaurant_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
     """page to edit a menu item."""
+
     if 'access_token' not in flask_session:
         return logInRedirect()
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
+    if not restaurant.user_id == user_id:
+        return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
 
     if request.method == "POST":
         edited_name = request.form['edited_name']
@@ -94,7 +112,6 @@ def editMenuItem(restaurant_id, menu_id):
     else:
         output = render_template('page_head.html', title = "The Menu Manager")
         print "\nrestaurants/restaurant_id/menu_id/edit accessed..."
-        restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
         output += render_template('editMenuItem.html',
                                   restaurant = restaurant,
@@ -105,8 +122,12 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
 def deleteMenuItem(restaurant_id, menu_id):
     """page to delete a menu item."""
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
     if 'access_token' not in flask_session:
         return logInRedirect()
+    if not restaurant.user_id == user_id:
+        return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
 
     if request.method == "POST":
         print "\ndeleteMenuItem POST triggered!, menu_id is: ", menu_id
@@ -119,7 +140,6 @@ def deleteMenuItem(restaurant_id, menu_id):
     else:
         print "restaurants/delete accessed..."
         output = render_template('page_head.html', title = "The Menu Manager")
-        restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
         output += render_template( 'deleteMenuItem.html',
                                    menuItem = menuItem,

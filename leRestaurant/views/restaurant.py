@@ -16,28 +16,17 @@ import pdb, pprint, inspect
 def index():
     return redirect('/restaurants/')
 
+# @app.route('/restaurants/new')
+# def newRestaurant():
+#     if 'access_token' not in flask_session:
+#         return logInRedirect()
+#     return render_template('newRestaurant.html')
+
 @app.route('/restaurants/')
 def showRestaurants():
-    output = render_template('page_head.html', title = "The Menu Manager")
-    restaurants = session.query(Restaurant).all()
-
-    for restaurant in restaurants:
-        menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
-        output += render_template( 'menu.html',
-                                   restaurant=restaurant,
-                                   menuItems=menuItems )
-        output += "<br>BREAKBREAKBREAK<br>"
-    return output
+    return redirect('restaurants/public'))
 
 @app.route('/restaurants/public')
 def publicRestaurants():
-    output = render_template('page_head.html', title = "The Menu Manager")
     restaurants = session.query(Restaurant).all()
-
-    for restaurant in restaurants:
-        menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant.id)
-        creator = getUserInfo(restaurant.user_id)
-        output += render_template('publicMenu.html', menuItems = menuItems, restaurant = restaurant, creator= creator)
-        output += "<br>JANKJANKJANK<br>"
-    print "publicRestaurants!"
-    return output
+    return render_template('publicRestaurants.html', restaurants=restaurants)
