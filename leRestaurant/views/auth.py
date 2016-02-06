@@ -36,9 +36,8 @@ def login():
     print random_string()
     state = ''.join(random_string())
     flask_session['state'] = state
-    output = render_template( 'login.html',
+    return render_template( 'login.html',
                               state = flask_session['state'] )
-    return output
 
 
 @app.route('/google_connect', methods=['POST'])
@@ -133,15 +132,13 @@ def google_connect():
     user_info_from_db = getUserInfo(user_id)
 
     # Render user info
-    output = render_template("page_head.html", title= "Login Results")
-    output += """ <h1>Welcome, {username}!</h1>
+    output = """ <h1>Welcome, {username}!</h1>
                    <img src="{picture}">
               """.format( username = flask_session['username'],
                           picture  = flask_session['picture'] )
     output += "</body></html>"
     flash("You are now logged in as: {username}".\
             format(username = flask_session['username'] ))
-
     return output
 
 @app.route('/google_disconnect')

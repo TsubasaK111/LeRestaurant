@@ -37,9 +37,6 @@ def newMenuItem(restaurant_id):
         return redirect(url_for("showMenu", restaurant_id=restaurant.id))
 
     else:
-        # output = render_template('page_head.html', title = "The Menu Manager")
-        # output += render_template('newMenuItem.html', restaurant = restaurant)
-        # return output
         return render_template('newMenuItem.html', restaurant = restaurant)
 
 
@@ -51,12 +48,11 @@ def publicMenu(restaurant_id):
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     creator = getUserInfo(restaurant.user_id)
 
-    print "\n publicMenu triggered: ", restaurant
-
     return render_template( 'publicMenu.html',
-                              menuItems = menuItems,
-                              restaurant = restaurant,
-                              creator= creator )
+                            menuItems = menuItems,
+                            restaurant = restaurant,
+                            creator= creator )
+
 
 @app.route('/restaurants/<int:restaurant_id>/')
 def showMenu(restaurant_id):
@@ -72,14 +68,10 @@ def showMenu(restaurant_id):
     menuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     creator = getUserInfo(restaurant.user_id)
 
-    print "\nrestaurantMenu triggered: ", restaurant
-
-    output = render_template('page_head.html', title = "The Menu Manager")
-    output += render_template( 'showMenu.html',
-                               restaurant = restaurant,
-                               menuItems = menuItems,
-                               creator = creator )
-    return output
+    return render_template( 'showMenu.html',
+                            restaurant = restaurant,
+                            menuItems = menuItems,
+                            creator = creator )
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit/', methods=['GET', 'POST'])
@@ -99,26 +91,21 @@ def editMenuItem(restaurant_id, menu_id):
         print "\neditMenuItem POST triggered, name is: ", edited_name
         old_name = session.query(MenuItem).filter_by(id = menu_id).first().name
 
-        result = session.execute("""
-                UPDATE menu_item
-                SET name=:edited_name
-                WHERE id=:edited_menu_item_id;
-            """,
-            {"edited_name": edited_name,
-            "edited_menu_item_id": menu_id}
-        )
+        result = session.execute(""" UPDATE menu_item
+                                     SET name=:edited_name
+                                     WHERE id=:edited_menu_item_id; """,
+                                 { "edited_name": edited_name,
+                                   "edited_menu_item_id": menu_id}
+                                 )
         session.commit()
         flash( "item '" +  old_name + "' edited to '" + edited_name + "'. Jawohl!")
         return redirect(url_for("showMenu", restaurant_id=restaurant_id))
 
     else:
-        output = render_template('page_head.html', title = "The Menu Manager")
-        print "\nrestaurants/restaurant_id/menu_id/edit accessed..."
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
-        output += render_template('editMenuItem.html',
+        return render_template('editMenuItem.html',
                                   restaurant = restaurant,
                                   menuItem = menuItem )
-        return output
 
 
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete/', methods=["GET","POST"])
@@ -143,9 +130,7 @@ def deleteMenuItem(restaurant_id, menu_id):
 
     else:
         print "restaurants/delete accessed..."
-        output = render_template('page_head.html', title = "The Menu Manager")
         menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
-        output += render_template( 'deleteMenuItem.html',
+        return render_template( 'deleteMenuItem.html',
                                    menuItem = menuItem,
                                    restaurant = restaurant )
-        return output

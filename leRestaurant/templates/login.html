@@ -1,23 +1,24 @@
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Restaurant Menu App Login</title>
-    <!-- Bootstrap 3 Online -->
-    <!-- <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css"> -->
+{% extends "main.html" %}
 
-    <!-- Bootstrap 3 offline -->
-    <link rel=stylesheet type = text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap-theme.min.css') }}" >
+{% block header %}
+  <!--creates anonymous function to insert script into DOM into this page  -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+  </script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+  </script>
+{% endblock %}
 
-    <!--creates anonymous function to insert script into DOM into this page  -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-    </script>
-    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
-    </script>
-
-</head>
-<body>
+{% block content %}
+  <div class="row top-menu">
+    <div class="col-md-6">
+      <a href="{{url_for('showRestaurants')}}">
+        <span class="glyphicon glyphicon-home" aria-hidden="true"></span>Show All Restaurants
+      </a>
+    </div>
+  </div>
+  <div class="row divider blue">
+  	<div class="col-md-12"></div>
+  </div>
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -87,5 +88,5 @@
       }
     }
   </script>
-</body>
-</html>
+
+{% endblock %}
