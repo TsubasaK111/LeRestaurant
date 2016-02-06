@@ -16,10 +16,13 @@ import pdb, pprint, inspect
 @app.route('/')
 @app.route('/restaurants/')
 def showRestaurants():
-    return redirect('restaurants/public')
+    restaurants = session.query(Restaurant).all()
+    return render_template('showRestaurants.html', restaurants=restaurants)
 
 @app.route('/restaurants/public')
 def publicRestaurants():
+    if 'access_token' not in flask_session:
+        return logInRedirect()
     restaurants = session.query(Restaurant).all()
     return render_template('publicRestaurants.html', restaurants=restaurants)
 
@@ -29,7 +32,6 @@ def newRestaurant():
 
     if 'access_token' not in flask_session:
         return logInRedirect()
-
     user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
 
     if request.method == "POST":
