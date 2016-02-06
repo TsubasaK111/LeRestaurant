@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+
   <div class="row top-menu">
     <div class="col-md-6">
       <a href="{{url_for('showRestaurants')}}">
@@ -17,7 +18,7 @@
     </div>
   </div>
   <div class="row divider blue">
-  	<div class="col-md-12"></div>
+    <div class="col-md-12"></div>
   </div>
 
   {% with messages = get_flashed_messages() %}
@@ -29,6 +30,8 @@
       </ul>
     {% endif %}
   {% endwith %}
+
+  <!--  Start Google OAuth -->
 
   <div id="sessionDebug">
     The current session state is {{ state }}
@@ -44,13 +47,10 @@
     </span>
   </div>
 
-  <div id="result"></div>
-
   <script>
     function signInCallback(authorizationResult){
       // If server responds, do the following:
       if (authorizationResult['code']) {
-
         console.log("authorization! yays!")
         console.log(authorizationResult)
 
@@ -88,5 +88,44 @@
       }
     }
   </script>
+  <!--  End Google OAuth -->
+
+
+  <!--  Start Facebook OAuth -->
+
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '523665454488045',
+        cookie     : true, //  enable cookies to allow server to access session
+        xfbml      : true, //  parse social plugins on this page
+        version    : 'v2.5' // the latest version as of 2016/02/06
+      });
+    };
+
+    (function(d, s, id){
+       var js, fjs = d.getElementsByTagName(s)[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement(s); js.id = id;
+       js.src = "//connect.facebook.net/en_US/sdk.js";
+       fjs.parentNode.insertBefore(js, fjs);
+     }(document, 'script', 'facebook-jssdk'));
+  </script>
+
+  <div
+    class="fb-like"
+    data-share="true"
+    data-width="450"
+    data-show-faces="true">
+  </div>
+
+
+  <div>
+    <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
+      <a href="javascript:sendTokenToServer()">Login with Facebook</a>
+    </fb:login-button>
+  </div>
+
+  <div id="result"></div>
 
 {% endblock %}
