@@ -22,6 +22,7 @@
     <div class="col-md-1"></div>
 		<div class="col-md-10 padding-none">
       <p>Create a <a href={{ url_for('newMenuItem', restaurant_id=restaurant.id) }}>New</a>  Menu Item</p>
+      <p><a href={{ url_for("deleteRestaurant", restaurant_id=restaurant.id) }}>Delete</a> this restaurant</p>
     </div>
 	</div>
 
@@ -32,6 +33,8 @@
         <h2>{{menuItem.name}}</h2>
         <p>{{menuItem.description}}</p>
         <p> {{menuItem.price}} </p>
+        <a href={{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_id=menuItem.id) }}>edit</a>
+        <a href={{ url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=menuItem.id) }}>delete</a>
       </div>
     </div>
   {% endfor %}

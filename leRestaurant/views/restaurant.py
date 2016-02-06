@@ -13,9 +13,6 @@ from auth import *
 import pdb, pprint, inspect
 
 @app.route('/')
-def index():
-    return redirect('/restaurants/')
-
 @app.route('/restaurants/')
 def showRestaurants():
     return redirect('restaurants/public')
@@ -47,8 +44,37 @@ def newRestaurant():
         return redirect(url_for("showRestaurants"))
 
     else:
-        # pdb.set_trace()
         return render_template('newRestaurant.html')
         # output = render_template('page_head.html', title = "The Menu Manager")
         # output += render_template('newMenuItem.html', restaurant = restaurant)
+        # return output
+
+@app.route("/restaurants/<int:restaurant_id>/delete", methods = ['GET', 'POST'])
+def deleteRestaurant(restaurant_id):
+    """page to delete a restaurant (authorized only for creators)."""
+
+    if 'access_token' not in flask_session:
+        return logInRedirect()
+    restaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+    user_id = getUserId(flask_session['email'],flask_session['google_plus_id'])
+    if not restaurant.user_id == user_id:
+        return redirect(url_for("publicMenu",restaurant_id = restaurant_id))
+
+    if request.method == "POST":
+        print "\ndeleteRestaurant POST triggered!"
+        deletedRestaurant = session.query(Restaurant).filter_by(id = restaurant_id).first()
+        session.delete(deletedRestaurant)
+        session.commit()
+        flash( "item '" + deletedRestaurant.name + "' deleted. Auf Wiedersehen!")
+        return redirect(url_for("showRestaurants"))
+
+    else:
+        print "restaurants/id/delete accessed..."
+        return render_template( "deleteRestaurant.html",
+                                restaurant = restaurant )
+        # output = render_template('page_head.html', title = "The Menu Manager")
+        # menuItem = session.query(MenuItem).filter_by(id = menu_id).first()
+        # output += render_template( 'deleteMenuItem.html',
+        #                            menuItem = menuItem,
+        #                            restaurant = restaurant )
         # return output

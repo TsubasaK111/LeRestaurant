@@ -37,9 +37,11 @@ def newMenuItem(restaurant_id):
         return redirect(url_for("showMenu", restaurant_id=restaurant.id))
 
     else:
-        output = render_template('page_head.html', title = "The Menu Manager")
-        output += render_template('newMenuItem.html', restaurant = restaurant)
-        return output
+        # output = render_template('page_head.html', title = "The Menu Manager")
+        # output += render_template('newMenuItem.html', restaurant = restaurant)
+        # return output
+        return render_template('newMenuItem.html', restaurant = restaurant)
+
 
 @app.route('/restaurants/<int:restaurant_id>/public')
 def publicMenu(restaurant_id):
@@ -51,12 +53,10 @@ def publicMenu(restaurant_id):
 
     print "\n publicMenu triggered: ", restaurant
 
-
-    output = render_template( 'publicMenu.html',
+    return render_template( 'publicMenu.html',
                               menuItems = menuItems,
                               restaurant = restaurant,
                               creator= creator )
-    return output
 
 @app.route('/restaurants/<int:restaurant_id>/')
 def showMenu(restaurant_id):
@@ -75,9 +75,10 @@ def showMenu(restaurant_id):
     print "\nrestaurantMenu triggered: ", restaurant
 
     output = render_template('page_head.html', title = "The Menu Manager")
-    output += render_template( 'menu.html',
-                               restaurant=restaurant,
-                               menuItems=menuItems )
+    output += render_template( 'showMenu.html',
+                               restaurant = restaurant,
+                               menuItems = menuItems,
+                               creator = creator )
     return output
 
 

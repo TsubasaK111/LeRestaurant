@@ -3,20 +3,20 @@
   {% include "header.html" %}
 
   <div class="row banner main">
-		<div class="col-md-1"></div>
+    <div class="col-md-1"></div>
 		<div class="col-md-11 padding-none">
-      <h1>Add a new menu item for {{restaurant.name}}!</h1>
-		</div>
-	</div>
+      <h1>Delete your Restaurant</h1>
+    </div>
+  </div>
 
   {% include "flash.html" %}
 
   <div class="row padding-top padding-bottom">
     <div class="col-md-1"></div>
     <div class="col-md-10 padding-none">
-      <form action = {{ url_for('newMenuItem', restaurant_id = restaurant.id) }} method = "POST" enctype = "multipart/form-data">
-        <input name = 'new_name' type = 'text' >
-        <input type = 'submit' value = 'Create'>
+      <form action = {{url_for('deleteRestaurant',restaurant_id=restaurant.id )}} method = 'POST' enctype = 'multipart/form-data'>
+          <p> Are you sure you want to delete {{restaurant.name}}?</p>
+          <input type = 'submit' value = 'Delete'>
       </form>
     </div>
   </div>
@@ -24,8 +24,8 @@
   <div class="row padding-top padding-bottom">
     <div class="col-md-1"></div>
     <div class="col-md-10 padding-none">
-      <a href={{ url_for('showMenu', restaurant_id=restaurant.id) }} >return to listing</a>
+      <a href={{ url_for('showMenu', restaurant_id=restaurant.id) }} >return to restaurant menu</a>
     </div>
   </div>
-
+  
 {% endblock %}
